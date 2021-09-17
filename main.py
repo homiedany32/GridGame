@@ -98,25 +98,19 @@ for row in range(32):
 current_units = []
 
 
-def AddUnit(Team, Typ, X, Y):
-    if Team == "Red":
-        if Typ == 1:
-            current_units.append([Team, 1, X, Y, 10])
-        elif Typ == 2:
-            current_units.append([Team, 3, X, Y, 20])
-        elif Typ == 3:
-            current_units.append([Team, 5, X, Y, 15])
-        elif Typ == 4:
-            current_units.append([Team, 7, X, Y, 10])
-    elif Team == "Purple":
-        if Typ == 1:
-            current_units.append([Team, 2, X, Y, 10])
-        elif Typ == 2:
-            current_units.append([Team, 4, X, Y, 20])
-        elif Typ == 3:
-            current_units.append([Team, 6, X, Y, 15])
-        elif Typ == 4:
-            current_units.append([Team, 8, X, Y, 10])
+def AddUnit(Typ, row, col):
+    if Typ == 1 or 3 or 5 or 7:
+        current_units.append(["Red", 2*Typ-1, row, col, 10])
+    elif Typ == 2 or 4 or 6 or 8:
+        current_units.append(["Purple", 2*Typ, row, col, 10])
+
+def ForceRemoveUnit(row, col):
+    for del_unit in current_units:
+        temp_row = del_unit[2]
+        temp_column = del_unit[3]
+        if temp_row == row and temp_column == col:
+            print(del_unit)
+            del current_units[0]
 
 
 
@@ -139,7 +133,14 @@ while not done:
             column = pos[0] // (WIDTH)
             row = pos[1] // (HEIGHT)
 
-            AddUnit("Red", 1, row, column)
+            if unit_grid[row][column] == 8:
+                ForceRemoveUnit(row, column)
+            elif unit_grid[row][column] == 0:
+                AddUnit(1, row, column)
+            else:
+                ForceRemoveUnit(row, column)
+                AddUnit(unit_grid[row][column], row, column)
+                unit_grid[row][column] = 0
             print(current_units)
  
     screen.fill(BLACK)
@@ -156,29 +157,23 @@ while not done:
                 color = WATER
             elif grid[row][column] == 4:
                 color = SEA
-            pygame.draw.rect(screen,
-                             color,
-                             [(WIDTH) * column,
-                              (HEIGHT) * row,
-                              WIDTH,
-                              HEIGHT])
+            pygame.draw.rect(screen,color, [(WIDTH) * column, (HEIGHT) * row, WIDTH, HEIGHT])
     
     # add units from 'current_units' list
-    for i in current_units:
+    for unit in current_units:
+        temp_row = unit[2]
+        temp_column = unit[3]
+        if unit[0] == "Red":
+            unit_grid[temp_row][temp_column] = unit[1] * 2 - 1
+        elif unit[0] == "Purple":
+            unit_grid[temp_row][temp_column] = unit[1] * 2
 
-        unit_grid[5][5] = 1
-
-        """
-        temp_row = current_units[i][2]
-        temp_column = current_units[i][3]
-        if current_units[i][0] == "Red":
-            if current_units[i][1] == 1:
-                unit_grid[temp_row][temp_column] = 1
-        """
     # unit drawing
     for row in range(32):
         for column in range(32):
-            if unit_grid[row][column] == 1:
+            if unit_grid[row][column] == 0:
+                
+            elif unit_grid[row][column] == 1:
                 color = RED
                 pygame.draw.ellipse(screen, color, [(WIDTH) * column + 9, (HEIGHT) * row, 8, 8], 0)
                 pygame.draw.line(screen, color, [(WIDTH) * column + 12, (HEIGHT) * row + 7], [(WIDTH) * column + 12, (HEIGHT) * row + 14], 2)
@@ -236,12 +231,8 @@ while not done:
                 pygame.draw.rect(screen, color, [(WIDTH) * column + 7, (HEIGHT) * row + 13, 12, 8])
                 pygame.draw.line(screen, color, [(WIDTH) * column + 15, (HEIGHT) * row + 13], [(WIDTH) * column + 15, (HEIGHT) * row + 3], 3)
                 pygame.draw.polygon(screen, color, [[(WIDTH) * column + 15, (HEIGHT) * row + 3], [(WIDTH) * column + 15, (HEIGHT) * row + 10], [(WIDTH) * column + 4, (HEIGHT) * row + 7]], 1)
-            
-
     
     clock.tick(60)
- 
-    
     pygame.display.flip()
  
 
